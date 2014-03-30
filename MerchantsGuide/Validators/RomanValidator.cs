@@ -8,11 +8,17 @@ namespace MerchantsGuide.Rules
     {
         public static char[] NonRepeatingRomanNumerals = { 'D', 'L', 'V' };
         public static char[] RepeatingRomanNumerals = { 'I', 'V', 'X', 'M' };
-        public static Dictionary<char, int> NonRepeatableLiteralsCount = new Dictionary<char, int> { { 'V', 0 }, { 'L', 0 }, { 'D', 0 } };
-        public static Dictionary<char, int> RepeatableLiteralsCount = new Dictionary<char, int> { { 'I', 0 }, { 'X', 0 }, { 'C', 0 }, { 'M', 0 } };
+        public static Dictionary<char, int> NonRepeatableLiteralsCount;
+        public static Dictionary<char, int> RepeatableLiteralsCount;
         public static IList<int> SubtractablesOfI = new List<int> { 5, 10 };
         public static IList<int> SubtractablesOfX = new List<int> { 50, 100 };
         public static IList<int> SubtractablesOfC = new List<int> { 100, 1000 };
+
+        private static void ResetLiteralCounts()
+        {
+            NonRepeatableLiteralsCount = new Dictionary<char, int> { { 'V', 0 }, { 'L', 0 }, { 'D', 0 } };
+            RepeatableLiteralsCount = new Dictionary<char, int> { { 'I', 0 }, { 'X', 0 }, { 'C', 0 }, { 'M', 0 } };
+        }
 
         public static bool IsSubtractable(RomanIntegerValues roman, double lastNumber)
         {
@@ -36,31 +42,32 @@ namespace MerchantsGuide.Rules
 
         public static bool IsValidRomanExpression(IEnumerable<char> values)
         {
-            ResetLiteralCounts();
             return ValidLiteralCount(values);
         }
 
         public static bool ValidLiteralCount(IEnumerable<char> values)
         {
             var enumerable = values as char[] ?? values.ToArray();
+            ResetLiteralCounts();
             PopulateLiteralCounters(enumerable);
 
             if (NonRepeatableLiteralsCount.Values.Any(m => m > 1))
             {
                 return false;
             }
-            
+
             if (RepeatableLiteralsCount.Values.Any(m => m > 3))
             {
                 foreach (var i in RepeatableLiteralsCount)
                 {
-                    if (i.Value > 3)
+                    if (i.Value >= 4)
                     {
                         var list = enumerable.ToList();
                         var indexOfFirsRepeatedLiteral = list.IndexOf(i.Key);
                         if (list.Count() > indexOfFirsRepeatedLiteral + 3)
                         {
-                            return CurrentLiteralSmallerThanPrevious(list.ElementAt(indexOfFirsRepeatedLiteral + 3), i.Key);
+                            return CurrentLiteralSmallerThanPrevious(list.ElementAt(indexOfFirsRepeatedLiteral + 3),
+                                i.Key);
                         }
                     }
                 }
@@ -95,11 +102,5 @@ namespace MerchantsGuide.Rules
         {
             return !(RomanConverter.GetDecimalValue(currentLiteral.ToString()) > RomanConverter.GetDecimalValue(repeatedValue.ToString()));
         }
-
-        private static void ResetLiteralCounts()
-        {
-            NonRepeatableLiteralsCount = new Dictionary<char, int> { { 'V', 0 }, { 'L', 0 }, { 'D', 0 } };
-            RepeatableLiteralsCount = new Dictionary<char, int> { { 'I', 0 }, { 'X', 0 }, { 'C', 0 }, { 'M', 0 } };
-        }           
     }
 }

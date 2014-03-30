@@ -7,12 +7,11 @@ namespace MerchantsGuide
 {
     public class OutputProcessor
     {
-
         public IDictionary<string, string> ProccessAnswer(Variables variables)
         {
             CalculateIntergalacticDecimalValues(variables);
             CalculateElementValues(variables);
-            return ProcessAnswers(variables).QuestionsAndAnswers;
+            return CalculateAnswers(variables).QuestionsAndAnswers;
         }
 
         public Variables CalculateIntergalacticDecimalValues(Variables variables)
@@ -39,23 +38,24 @@ namespace MerchantsGuide
                     else
                     {
                         var valueDouble = double.Parse(missingValue.Value, System.Globalization.CultureInfo.InvariantCulture);
-                        variables.ElementValues.Add(item, valueDouble/RomanConverter.GetDecimalValue(value));
+                        variables.ElementValues.Add(item, valueDouble / RomanConverter.GetDecimalValue(value));
                     }
                 }
 
             }
             return variables;
         }
-
-        public Variables ProcessAnswers(Variables variables)
+        
+        public Variables CalculateAnswers(Variables variables)
         {
+            //todo test this method
             var questionAnswersDictionary = variables.QuestionsAndAnswers.ToDictionary(questionsAndAnswer => questionsAndAnswer.Key, questionsAndAnswer => questionsAndAnswer.Value);
-            
+
             foreach (var questionAnswer in questionAnswersDictionary)
             {
                 var value = "";
                 var itemList = questionAnswer.Key.Split(' ').ToList();
-                
+
                 var last = itemList.Last();
                 foreach (var item in itemList)
                 {
@@ -71,7 +71,7 @@ namespace MerchantsGuide
                     else if (variables.ElementValues.Keys.Contains(item))
                     {
                         variables.QuestionsAndAnswers[questionAnswer.Key] = "is " +
-                                                                            (RomanConverter.GetDecimalValue(value)*
+                                                                            (RomanConverter.GetDecimalValue(value) *
                                                                              variables.ElementValues[item] + " Credits");
                     }
                 }
